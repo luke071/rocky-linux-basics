@@ -20,9 +20,9 @@ mkdir -p /www/french-open
 ```
 1.3 Create index.html files in the main directory and subpages.
 ```bash
-echo "<h1>Wimbledon</h1>" | sudo tee /www/wimbledon/index.html
-echo "<h1>French Open</h1>" | sudo tee /www/french-open/index.html
-echo "<h1>Home page</h1>" | sudo tee /www/index.html
+echo "<h1>Wimbledon</h1>" | tee /www/wimbledon/index.html
+echo "<h1>French Open</h1>" | tee /www/french-open/index.html
+echo "<h1>Home page</h1>" | tee /www/index.html
 ```
 1.4 Set permissions.
 ```bash
@@ -62,9 +62,11 @@ nano /etc/httpd/conf.d/custom-sites.conf
 ```
 1.6 Set up Apache on port 100.   
 ```bash
-nano /etc/httpd/conf.d/custom-sites.conf
+nano /etc/httpd/conf/httpd.conf
 ```
-Added Listen 100 listening.  
+Added Listen 100 listening. 
+Listen 80
+Listen 100 
 1.7 Allow access through port 100 in firewalld.  
 ```bash
 firewall-cmd --permanent --add-port=100/tcp
@@ -358,7 +360,7 @@ fail2ban-client reload
 ```bash
 su -
 dnf update -y
-dnf install httpd
+dnf install httpd -y
 ```
 2. Start the service immediately and configure the service to start after each system boot.  
 ```bash
