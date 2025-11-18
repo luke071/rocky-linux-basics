@@ -1,58 +1,9 @@
 # Introduce to Rocky Linux 9
 Rocky Linux 9 is built directly from RHEL 9 sources and has identical features, fixes and behavior.  
-# 1. Apache installation
-1. Update system then install HTTP packages.  
-```bash
-su -
-dnf update -y
-dnf install httpd
-```
-2. Start the service immediately and configure the service to start after each system boot.  
-```bash
-systemctl start httpd
-systemctl enable httpd
-```
-3. Status check.  
-```bash
-systemctl status httpd
-```
-4. Allow HTTP and HTTPS traffic in the firewall.  
-```bash
-firewall-cmd --permanent --add-service=http
-firewall-cmd --permanent --add-service=https
-firewall-cmd --reload
-```
 
-# 2. Introductory scenario
-1. Check the existing existence of the host. Change the host to web-server . Then check if Apache is running and set static IP addresses on the interface.  
-2. Create the main directory /www and subpages in this directory /wimbledon and /french-open
-3. Create index.html files in the main directory and subpages.
-4. Set permissions.
-5. Configure Apache VirtualHosts on port 100.
-6. Set up Apache on port 100.
-7. Allow access through port 100 in firewalld
-8. Configure SELinux to allow Apache to use non-standard ports.
-9. Configure access to the website located in the user's directory via the userdir module.
-10. Test access to websites.
-11. After adding a 2 GB disk to the machine, create two partitions of 1 GB each with automatic punting after reboot.
-12. Check the technical condition of this disk with smartctl.
-13. Create the Guests group and the Guest-1 user with a home directory for which the maximum number of days between password changes is 5 days. 
-14. Assign the Guest-1 account to the Guests group. In the Guest-1 home directory, create a hidden documents directory and give it full rights for the Guests group.  
-15. Create files file-1, file-2 and file-3 in Guest-1's home directory. Create a compressed .tar.gz archive from these files. Then unpack the archive to a folder in home directory /Guest-1/unpacked .
-16. Execute the command alias top -b -n 1 | head -n 17.
-17. Check the complete information about the system kernel.
-18. Check the version and name of the distribution.
-19. Check system uptime and load.
-20. Check what uses the most RAM.
-21. Check the parameters of the motherboard, processor, RAM.
-22. Check the active connection and listening ports.
-23. View system logs.
-24. View kernel messages.
-25. Disable ping(ICMP echo).
 
-## Solution
-
-1. 
+# 1. Introductory scenario
+1.1 Check the existing existence of the host. Change the host to web-server . Then check if Apache is running and set static IP addresses on the interface.  
 ```bash
 su -
 hostnamectl status
@@ -62,23 +13,24 @@ nmcli connection show
 sudo nmcli con modify "enp0s2" ipv4.method manual ipv4.addresses "192.168.0.50/24,192.168.0.51/24" ipv4.gateway 192.168.0.1 ipv4.dns 8.8.8.8
 nmcli con up "enp0s2"
 ```
-2.  
+1.2 Create the main directory /www and subpages in this directory /wimbledon and /french-open
 ```bash
 mkdir -p /www/wimbledon
 mkdir -p /www/french-open
 ```
-3. 
+1.3 Create index.html files in the main directory and subpages.
 ```bash
 echo "<h1>Wimbledon</h1>" | sudo tee /www/wimbledon/index.html
 echo "<h1>French Open</h1>" | sudo tee /www/french-open/index.html
 echo "<h1>Home page</h1>" | sudo tee /www/index.html
 ```
-4.  
+1.4 Set permissions.
 ```bash
 chown -R apache:apache /www
 chmod -R 755 /www
 ```
-5. Creating a custom-sites.conf file with an entry.  
+1.5 Configure Apache VirtualHosts on port 100.  
+Creating a custom-sites.conf file with an entry.  
 ```bash
 nano /etc/httpd/conf.d/custom-sites.conf
 ```
@@ -108,16 +60,18 @@ nano /etc/httpd/conf.d/custom-sites.conf
     </Directory>
 </VirtualHost>
 ```
-6. Added Listen 100 listening.  
+1.6 Set up Apache on port 100.   
 ```bash
 nano /etc/httpd/conf.d/custom-sites.conf
 ```
-7.  
+Added Listen 100 listening.  
+1.7 Allow access through port 100 in firewalld.  
 ```bash
 firewall-cmd --permanent --add-port=100/tcp
 firewall-cmd --reload  
-```  
-8.  Adding TCP port 100 to the SELinux context as allowed for the HTTP server.  
+``` 
+1.8 Configure SELinux to allow Apache to use non-standard ports.  
+Adding TCP port 100 to the SELinux context as allowed for the HTTP server.  
 ```bash
 semanage port -a -t http_port_t -p tcp 100
 ```
@@ -143,7 +97,8 @@ http://192.168.0.51:100 - will show the Wimbledon website
 http://192.168.0.50 - show home page  
 http://192.168.0.51 - show home page   
 ![alt text](./assets/3.png)  
-9.  Enabling the UserDir module by editing the /etc/httpd/conf.d/userdir.conf file.  
+1.9 Configure access to the website located in the user's directory via the userdir module.  
+Enabling the UserDir module by editing the /etc/httpd/conf.d/userdir.conf file.  
 ```bash
 <IfModule mod_userdir.c>
     UserDir public_html
@@ -175,13 +130,13 @@ echo "<h1>User directory</h1>" > ~/public_html/index.html
 chmod 711 ~
 chmod 711 ~
 ```
-10. Browser accessibility test of the user's home directory.  
-
+1.10 Test access to websites.  
+Browser accessibility test of the user's home directory. 
 http://192.168.0.50/~student - will show the page in the student user directory  
 ![alt text](./assets/4.png)  
 
-
-11. After adding a new hard drive in Virtualbox (with the Pre-allocate Full Size option).  
+1.11 After adding a 2 GB disk to the machine, create two partitions of 1 GB each with automatic punting after reboot.
+After adding a new hard drive in Virtualbox (with the Pre-allocate Full Size option).  
 ```bash
 lsblk
 ```
@@ -234,7 +189,8 @@ df - h
 Test:  
 ![alt text](./assets/disc-2.png)  
 
-12. Installing the smartmontools hard drive monitoring and diagnostics toolkit.  
+1.12 Check the technical condition of this disk with smartctl.
+Installing the smartmontools hard drive monitoring and diagnostics toolkit.  
 ```bash
 dnf install smartmontools
 ```
@@ -242,35 +198,27 @@ Performing a short test.
 ```bash
 smartctl -t short /dev/sdb
 ```
-
-13. 
-
+1.13 Create the Guests group and the Guest-1 user with a home directory for which the maximum number of days between password changes is 5 days. 
 ```bash
 groupadd Guests
 useradd -m -G Guests -e "" -s /bin/bash Guest-1
 passwd Guest-1
 chage -M 5 Guest-1
 ```
-
-14.     
-
+1.14 Assign the Guest-1 account to the Guests group. In the Guest-1 home directory, create a hidden documents directory and give it full rights for the Guests group.  
 ```bash
 sudo -u Guest-1 mkdir /home/Guest-1/.documents
 sudo chmod 770 /home/Guest-1/.documents
 sudo chown Guest-1:Guests /home/Guest-1/.documents
 ```
-
-15. 
-
+1.15 Create files file-1, file-2 and file-3 in Guest-1's home directory. Create a compressed .tar.gz archive from these files. Then unpack the archive to a folder in home directory /Guest-1/unpacked .
 ```bash
 sudo -u Guest-1 touch /home/Guest-1/file-{1..3}
 sudo -u Guest-1 tar -czvf /home/Guest-1/files.tar.gz -C /home/Guest-1 file-1 file-2 file-3
 mkdir /home/Guest-1/unpacked
 tar -xvzf /home/Guest-1/files.tar.gz -C /home/Guest-1/unpacked
 ```
-
-16. 
-
+1.16 Execute the command alias top -b -n 1 | head -n 17.
 ```bash
 alias toptop='top -b -n 1 | head -n 17'
 ```
@@ -278,23 +226,23 @@ Alias use.
 ```bash
 toptop
 ```
-17. 
+1.17 Check the complete information about the system kernel.
 ```bash
 uname -a
 ```
-18. 
+1.18 Check the version and name of the distribution.
 ```bash
 cat /etc/os-release
 ```
-19. 
+1.19 Check system uptime and load.
 ```bash
 uptime
 ```
-20. 
+1.20 Check what uses the most RAM.
 ```bash
 ps aux --sort=-%mem | head
 ```
-21. 
+1.21 Check the parameters of the motherboard, processor, RAM.
 ```bash
 dnf install dmidecode pciutils -y
 dmidecode | less
@@ -302,19 +250,19 @@ lscpu
 free -h
 lspci
 ```
-22. 
+1.22 Check the active connection and listening ports.
 ```bash
 ss -tulnp
 ```
-23. 
+1.23 View system logs.
 ```bash
 journalctl -xe | less
 ```
-24. 
+1.24 View kernel messages.
 ```bash
 dmesg | less
 ```
-25. 
+1.25 Disable ping (ICMP echo).
 Permanently disable ping.
 ```bash
 firewall-cmd --add-icmp-block=echo-request --permanent
@@ -328,8 +276,7 @@ firewall-cmd --reload
 ```
 
 
-
-# 3. How to secure Rocky Linux 9
+# 2. How to secure Rocky Linux 9
 ## Logging failed login attempts to a text file.  
 ```bash
 su -
@@ -405,6 +352,29 @@ Fail2ban configuration reload.
 fail2ban-client reload
 ```
 
+# 3. Apache installation
+
+1. Update system then install HTTP packages.  
+```bash
+su -
+dnf update -y
+dnf install httpd
+```
+2. Start the service immediately and configure the service to start after each system boot.  
+```bash
+systemctl start httpd
+systemctl enable httpd
+```
+3. Status check.  
+```bash
+systemctl status httpd
+```
+4. Allow HTTP and HTTPS traffic in the firewall.  
+```bash
+firewall-cmd --permanent --add-service=http
+firewall-cmd --permanent --add-service=https
+firewall-cmd --reload
+```
 
 # 4. Cockpit installation
 
